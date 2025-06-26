@@ -1,7 +1,6 @@
 import { getTrendingMovies } from "api/TheTrendingMovieApi";
-import { Header } from "components/Header/Header";
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Container, MovieItem, MovieLink, MovieList, Title } from "./Home.styled";
 
 const Home = () => {
     const [movies, setMovies] = useState([]);
@@ -13,15 +12,16 @@ const Home = () => {
     },[])
     return (
         <>
-            <Header />
-            <h1>Trending today</h1>
-            <ul>{movies.map((movie)=> {
+            <Container>
+            <Title>Trending today</Title>
+            <MovieList>{movies.map((movie)=> {
                 return (
-                    <li key={movie.id}>
-                        <Link to={`/movies/${movie.id}`} state={{from: "/"}}>{movie.title}</Link>
-                    </li>
+                    <MovieItem key={movie.id}>
+                        <MovieLink to={`/movies/${movie.id}`} state={{from: "/"}}>{movie.title}</MovieLink>
+                    </MovieItem>
                 )
-            })}</ul>
+            })}</MovieList>
+                </Container>
         </>
     )
 }

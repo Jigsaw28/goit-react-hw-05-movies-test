@@ -1,22 +1,28 @@
 import { getMovieBySearch } from 'api/getMovieBySearch';
-import { Header } from 'components/Header/Header';
 import { useEffect, useState } from 'react';
-import { Link, useLocation, useSearchParams } from 'react-router-dom';
+import { useLocation, useSearchParams } from 'react-router-dom';
+import { Container, MovieItem, MovieLink, MovieList } from './Home.styled';
+import { SearchButton, SearchForm, SearchInput } from './Movies.styled';
+import { Loader } from 'components/Loader/Loader';
 
 const Movies = () => {
   const [movies, setMovies] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
-  const query = searchParams.get('query')?? '';
- 
+  const query = searchParams.get('query') ?? '';
+
   useEffect(() => {
     if (query) {
+      setLoading(true);
       getMovieBySearch(query).then(data => {
         if (data.length === 0) {
           alert('No movies found for your search query');
         } else {
           setMovies(data);
         }
+      }).finally(() => {
+        setLoading(false);
       });
     }
   }, [query]);
@@ -27,7 +33,7 @@ const Movies = () => {
     const searchQuery = form.query.value.trim();
     if (searchQuery === '') {
       alert('Please enter a search query');
-      return setSearchParams({})
+      return setSearchParams({});
     }
     setSearchParams({ query: searchQuery });
     form.reset();
@@ -35,35 +41,40 @@ const Movies = () => {
 
   return (
     <>
-      <Header />
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          name="query"
-          autoComplete="off"
-          autoFocus
-          placeholder="Search movies"
-        />
-        <button type="submit">Search</button>
-      </form>
-      <ul>
-        {movies.map(movie => {
-          return (
-            <li key={movie.id}>
-              <Link
-                to={`/movies/${movie.id}`}
-                state={{ from: location }}
-              >
-                {movie.title || movie.name} (
-                {new Date(
-                  movie.release_date || movie.first_air_date
-                ).getFullYear()}
-                )
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
+      <Container>
+        <SearchForm onSubmit={handleSubmit}>
+          <SearchInput
+            type="text"
+            name="query"
+            autoComplete="off"
+            autoFocus
+            placeholder="Search movies"
+          />
+          <SearchButton type="submit">Search</SearchButton>
+        </SearchForm>
+        <MovieList>
+          {!loading ? (
+            movies.map(movie => {
+              return (
+                <MovieItem key={movie.id}>
+                  <MovieLink
+                    to={`/movies/${movie.id}`}
+                    state={{ from: location }}
+                  >
+                    {movie.title || movie.name} (
+                    {new Date(
+                      movie.release_date || movie.first_air_date
+                    ).getFullYear()}
+                    )
+                  </MovieLink>
+                </MovieItem>
+              );
+            })
+          ) : (
+            <Loader />
+          )}
+        </MovieList>
+      </Container>
     </>
   );
 };
